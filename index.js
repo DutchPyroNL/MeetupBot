@@ -43,7 +43,7 @@ client.on('message', (message) => {
         if (userStats.xp >= xpToNextLevel) {
             userStats.level++;
             userStats.xp = userStats.xp - xpToNextLevel;
-            message.channel.send(message.author + ' has reached level ' + userStats.level);
+            message.channel.send("<@" + message.user.id + ">" + ' has reached level ' + userStats.level);
         }
 
         jsonfile.writeFileSync('stats.json', stats);
@@ -57,17 +57,24 @@ client.on('message', (message) => {
     
     if(message.content.toLowerCase().startsWith(`${config.prefix}level`)) {
         let member = message.mentions.members.first();
-        let embed = new Discord.MessageEmbed()
-        .setColor("#00FF00")
-        .addField("Level", userStats.level)
-        .addField("XP", userStats.xp+"/"+xpToNextLevel);
-        if(!member) return message.channel.send(embed)
-        let memberInfo = guildStats[message.author.id]
-        let embed2 = new Discord.MessageEmbed()
-        .setColor("#00FF00")
-        .addField("Level", memberInfo.level)
-        .addField("XP", memberInfo.xp+"/100")
-        message.channel.send(embed2)
+        console.log(member);
+        
+        if(typeof member !== 'undefined'){ 
+            let memberInfo = guildStats[member.user.id];
+            let nextXp = 5 * Math.pow(memberInfo.level, 2) + 50 * memberInfo.level + 100;
+            let embed = new Discord.MessageEmbed()
+            .setColor("#00FF00")
+            .addField("Level", memberInfo.level)
+            .addField("XP", memberInfo.xp+"/"+nextXp);
+            return message.channel.send(embed)
+        }else{
+            let memberInfo = guildStats[message.author.id];
+            let embed2 = new Discord.MessageEmbed()
+            .setColor("#00FF00")
+            .addField("Level", memberInfo.level)
+            .addField("XP", memberInfo.xp + "/" + xpToNextLevel)
+            message.channel.send(embed2)
+        } 
     }
 });
 
