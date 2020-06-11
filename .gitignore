@@ -1,2 +1,4 @@
 config.json
 database.json
+stats.json
+node_modules/
