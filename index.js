@@ -3,20 +3,6 @@ const client = new Discord.Client();
 const config = require('./config.json');
 const fs = require("fs");
 let db = JSON.parse(fs.readFileSync("./database.json", "utf8"));
-//const mysql = require('mysql')
-
-/*var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "1234",
-    database: "sadb",
-    port: "3307"
-})*/
-
-/*con.connect(err => {
-    if(err) throw err;
-    console.log("Connected to db");
-})*/
 
 client.on("message", message => {
     if (message.author.bot) return; 
