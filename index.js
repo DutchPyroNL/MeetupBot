@@ -6,10 +6,6 @@ const fs = require("fs");
 const jsonfile = require('jsonfile');
 const random = require('random');
 
-let db = JSON.parse(fs.readFileSync("./database.json", "utf8"));
-let cooldown = new Set();
-let cdseconds = 60; 
-
 // Level system start
 var stats = {};
 if (fs.existsSync('stats.json')) {
@@ -48,8 +44,8 @@ client.on('message', (message) => {
 
         jsonfile.writeFileSync('stats.json', stats);
 
-        console.log(message.author.username + ' now has ' + userStats.xp);
-        console.log(xpToNextLevel + ' XP needed for next level.');
+        // console.log(message.author.username + ' now has ' + userStats.xp);
+        // console.log(xpToNextLevel + ' XP needed for next level.');
     }
 
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
@@ -57,23 +53,24 @@ client.on('message', (message) => {
     
     if(message.content.toLowerCase().startsWith(`${config.prefix}level`)) {
         let member = message.mentions.members.first();
-        console.log(member);
         
         if(typeof member !== 'undefined'){ 
             let memberInfo = guildStats[member.user.id];
             let nextXp = 5 * Math.pow(memberInfo.level, 2) + 50 * memberInfo.level + 100;
             let embed = new Discord.MessageEmbed()
+            .setTitle("Stats\n" + member.user.tag)
             .setColor("#00FF00")
             .addField("Level", memberInfo.level)
             .addField("XP", memberInfo.xp+"/"+nextXp);
             return message.channel.send(embed)
         }else{
             let memberInfo = guildStats[message.author.id];
-            let embed2 = new Discord.MessageEmbed()
+            let embed = new Discord.MessageEmbed()
+            .setTitle("Stats\n" + message.member.user.tag)
             .setColor("#00FF00")
             .addField("Level", memberInfo.level)
-            .addField("XP", memberInfo.xp + "/" + xpToNextLevel)
-            message.channel.send(embed2)
+            .addField("XP", memberInfo.xp + "/" + xpToNextLevel);
+            message.channel.send(embed);
         } 
     }
 });
@@ -95,38 +92,6 @@ client.on('message', message => {
       message.author.send(helpembed);
     }
 });
-
-/*
-client.on("message", message => {
-    if (message.author.bot) return; 
-    // if the user is not on registered yes add the user and set xp to 0
-    if (!db[message.author.id]) db[message.author.id] = {
-        xp: 0,
-        level: 0
-      };
-    
-    if(!cooldown.has(message.author.id)){
-        db[message.author.id].xp++;
-        cooldown.add(message.author.id);
-    }
-    let userInfo = db[message.author.id];
-    let xpNeeded = 5 * (userInfo.level ^ 2) + 50 * userInfo.level + 100;
-    if(userInfo.xp > xpNeeded) {
-        userInfo.level++
-        userInfo.xp = 0
-        message.reply("Congratulations, you level up")
-    }
-    
-    fs.writeFile("./database.json", JSON.stringify(db), (x) => {
-        if (x) console.error(x)
-      });
-
-    setTimeout(() => {
-        cooldown.delete(message.author.id)
-    }, cdseconds * 1000)
-})
-*/
-
 
 // Meetup command
 client.on('message', message => {
@@ -159,5 +124,12 @@ client.on('message', message => {
     }
 });
 
+
+client.on("ready", async () => {
+    console.log(client.user.username + ' is now online and working!');
+    client.user.setActivity('HTB meetup discord!', {type: 'WATCHING'})
+    .then(presence => console.log(`Activity set to ${presence.activities[0].name}`))
+    .catch(console.error);
+});
 
 client.login(config.token);
